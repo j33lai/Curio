@@ -2,6 +2,7 @@ package com.example.j33lai.curio;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,17 @@ import android.widget.TextView;
 
 import com.example.j33lai.curio.dummy.DummyContent;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -63,6 +76,11 @@ public class CrowdCurioListActivity extends AppCompatActivity {
             // If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
+        }
+        try {
+            new getProjects().execute(new URL("http://test.crowdcurio.com/api/project/"));
+        } catch (MalformedURLException e) {
+            Log.d("URL", "formatError");
         }
     }
 
@@ -136,6 +154,53 @@ public class CrowdCurioListActivity extends AppCompatActivity {
             public String toString() {
                 return super.toString() + " '" + mContentView.getText() + "'";
             }
+        }
+    }
+
+    private class getProjects extends AsyncTask<URL, Integer, JSONObject> {
+        @Override
+        protected JSONObject doInBackground(URL... urls) {
+            int count = urls.length;
+            JSONObject jo = new JSONObject();
+            if (count > 0) {
+                URL url = urls[0];
+                try {
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    try {
+                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                        BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                        StringBuilder responseStrBuilder = new StringBuilder();
+
+                        String inputStr;
+                        while ((inputStr = streamReader.readLine()) != null)
+                            responseStrBuilder.append(inputStr);
+
+                        jo = new JSONObject(responseStrBuilder.toString());
+
+                    } catch (JSONException e) {
+                        Log.d("JSON", "JSONError");
+                    } finally {
+                        urlConnection.disconnect();
+                    }
+
+                } catch (IOException e) {
+                    Log.d("URL", "Connection error");
+                }
+
+            }
+
+            Log.d("test", "test");
+            return jo;
+        }
+
+        protected void onPostExecute(JSONObject result) {
+            String test = "";
+            try {
+                test = result.getString("data");
+            } catch (JSONException e) {
+                Log.d("result", "error");
+            }
+            Log.d("result", test);
         }
     }
 }

@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.example.j33lai.curio.dummy.DummyContent;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +48,7 @@ public class CrowdCurioListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
+    private static boolean loadweb = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +68,9 @@ public class CrowdCurioListActivity extends AppCompatActivity {
             }
         });
 
-        View recyclerView = findViewById(R.id.crowdcurio_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        //View recyclerView = findViewById(R.id.crowdcurio_list);
+        //assert recyclerView != null;
+        //setupRecyclerView((RecyclerView) recyclerView);
 
         if (findViewById(R.id.crowdcurio_detail_container) != null) {
             // The detail container view will be present only in the
@@ -77,14 +79,25 @@ public class CrowdCurioListActivity extends AppCompatActivity {
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
-        try {
-            new getProjects().execute(new URL("http://test.crowdcurio.com/api/project/"));
-        } catch (MalformedURLException e) {
-            Log.d("URL", "formatError");
+        if (!loadweb) {
+            try {
+                new getProjects().execute(new URL("http://test.crowdcurio.com/api/project/"));
+            } catch (MalformedURLException e) {
+                Log.d("URL", "formatError");
+            }
+        } else {
+            View recyclerView = findViewById(R.id.crowdcurio_list);
+            assert recyclerView != null;
+            setupRecyclerView((RecyclerView) recyclerView, null);
         }
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
+    private void setupRecyclerView(@NonNull RecyclerView recyclerView, JSONObject jo) {
+        if (!loadweb) {
+            loadweb = true;
+            DummyContent.initItem(jo);
+            Log.d("repeat", "repeat");
+        }
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS));
     }
 
@@ -107,7 +120,7 @@ public class CrowdCurioListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            holder.mIdView.setText(mValues.get(position).id);
+            //holder.mIdView.setText(mValues.get(position).id);
             holder.mContentView.setText(mValues.get(position).content);
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -164,27 +177,25 @@ public class CrowdCurioListActivity extends AppCompatActivity {
             JSONObject jo = new JSONObject();
             if (count > 0) {
                 URL url = urls[0];
+                HttpURLConnection urlConnection = null;
                 try {
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    try {
-                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                        BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                        StringBuilder responseStrBuilder = new StringBuilder();
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    BufferedReader streamReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                    StringBuilder responseStrBuilder = new StringBuilder();
 
-                        String inputStr;
-                        while ((inputStr = streamReader.readLine()) != null)
-                            responseStrBuilder.append(inputStr);
-
-                        jo = new JSONObject(responseStrBuilder.toString());
-
-                    } catch (JSONException e) {
-                        Log.d("JSON", "JSONError");
-                    } finally {
-                        urlConnection.disconnect();
+                    String inputStr;
+                    while ((inputStr = streamReader.readLine()) != null) {
+                        responseStrBuilder.append(inputStr);
                     }
+                    jo = new JSONObject(responseStrBuilder.toString());
+                    JSONArray joa = jo.getJSONArray("data");
 
-                } catch (IOException e) {
-                    Log.d("URL", "Connection error");
+
+                } catch (IOException|JSONException e) {
+                    Log.d("test", "catcherror");
+                } finally {
+                    urlConnection.disconnect();
                 }
 
             }
@@ -195,11 +206,16 @@ public class CrowdCurioListActivity extends AppCompatActivity {
 
         protected void onPostExecute(JSONObject result) {
             String test = "";
+            /*
             try {
-                test = result.getString("data");
+                test = result.getJSONArray("data").getJSONObject(2).getString("type");
             } catch (JSONException e) {
                 Log.d("result", "error");
-            }
+            }*/
+
+            View recyclerView = findViewById(R.id.crowdcurio_list);
+            assert recyclerView != null;
+            setupRecyclerView((RecyclerView) recyclerView, result);
             Log.d("result", test);
         }
     }

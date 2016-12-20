@@ -1,5 +1,15 @@
 package com.example.j33lai.curio.dummy;
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,23 +23,48 @@ import java.util.Map;
  */
 public class DummyContent {
 
+    public static JSONObject jsonobj = new JSONObject();
     /**
      * An array of sample (dummy) items.
      */
-    public static final List<DummyItem> ITEMS = new ArrayList<DummyItem>();
+    public static List<DummyItem> ITEMS = new ArrayList<DummyItem>();
 
     /**
      * A map of sample (dummy) items, by ID.
      */
-    public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
+    public static Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
 
-    private static final int COUNT = 25;
-
+    private static int COUNT = 0;
+/*
     static {
         // Add some sample items.
         for (int i = 1; i <= COUNT; i++) {
             addItem(createDummyItem(i));
         }
+    }
+*/
+    public static void initItem(JSONObject obj) {
+        jsonobj = obj;
+        try {
+            JSONArray joa = jsonobj.getJSONArray("data");
+            COUNT = joa.length();
+            for (int i = 0; i < COUNT; i++) {
+                JSONObject tmp_joa = joa.getJSONObject(i);
+                JSONObject tmp_jo = tmp_joa.getJSONObject("attributes");
+
+                addItem(createDummyItem(i+1, tmp_jo.getString("name"), tmp_jo.getString("description")));
+            }
+
+        } catch (JSONException e) {
+            Log.d("Dummy", "Error");
+            COUNT = 25;
+            ITEMS.clear();
+            ITEM_MAP.clear();
+            for (int i = 1; i <= COUNT; i++) {
+                addItem(createDummyItem(i));
+            }
+        }
+
     }
 
     private static void addItem(DummyItem item) {
@@ -38,7 +73,11 @@ public class DummyContent {
     }
 
     private static DummyItem createDummyItem(int position) {
-        return new DummyItem(String.valueOf(position), "Item " + position, makeDetails(position));
+        return new DummyItem(String.valueOf(position), "Project " + position, makeDetails(position));
+    }
+
+    private static DummyItem createDummyItem(int position, String conts, String details) {
+        return new DummyItem(String.valueOf(position), conts, details);
     }
 
     private static String makeDetails(int position) {

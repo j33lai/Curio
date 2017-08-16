@@ -1,3 +1,3 @@
 # CrowdCurio
-![GitHub Logo](screenshot_1.png)
-![GitHub Logo](screenshot_2.png)
+![GitHub Logo](Screenshot_1.png)
+![GitHub Logo](Screenshot_2.png)

@@ -44,6 +44,8 @@ public class DummyContent {
     }
 */
     public static void initItem(JSONObject obj) {
+        ITEMS.clear();
+        ITEM_MAP.clear();
         jsonobj = obj;
         try {
             JSONArray joa = jsonobj.getJSONArray("data");
@@ -52,14 +54,12 @@ public class DummyContent {
                 JSONObject tmp_joa = joa.getJSONObject(i);
                 JSONObject tmp_jo = tmp_joa.getJSONObject("attributes");
 
-                addItem(createDummyItem(i+1, tmp_jo.getString("name"), tmp_jo.getString("description")));
+                addItem(createDummyItem(i+1, tmp_jo.getString("name"), "test"));
             }
 
         } catch (JSONException e) {
             Log.d("Dummy", "Error");
             COUNT = 25;
-            ITEMS.clear();
-            ITEM_MAP.clear();
             for (int i = 1; i <= COUNT; i++) {
                 addItem(createDummyItem(i));
             }

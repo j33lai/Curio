@@ -1,9 +1,49 @@
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/crowdcurio_detail"
-    style="?android:attr/textAppearanceLarge"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:textIsSelectable="true"
-    tools:context="com.example.j33lai.curio.CrowdCurioDetailFragment" />
+    android:orientation="vertical"
+    tools:context="com.example.j33lai.curio.CrowdCurioDetailFragment" >
+    <ProgressBar
+        android:id="@+id/app_progress1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:id = "@+id/crowdcurio_detail_head"
+        android:scaleType="centerCrop"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="100dp" />
+
+    <TextView android:id="@+id/crowdcurio_detail_about"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textIsSelectable="true">
+
+    </TextView>
+
+    <TextView android:id="@+id/crowdcurio_detail_question"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textIsSelectable="true">
+
+    </TextView>
+
+    <TextView android:id="@+id/crowdcurio_detail_team"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textIsSelectable="true">
+
+    </TextView>
+
+
+
+</LinearLayout>

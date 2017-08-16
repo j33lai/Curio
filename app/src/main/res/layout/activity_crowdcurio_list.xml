@@ -19,7 +19,18 @@
             android:layout_height="?attr/actionBarSize"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+        <android.support.v7.widget.SearchView
+            android:id="@+id/app_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></android.support.v7.widget.SearchView>
+
+        <ProgressBar
+            android:id="@+id/app_progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
     </android.support.design.widget.AppBarLayout>
+
 
     <FrameLayout
         android:id="@+id/frameLayout"

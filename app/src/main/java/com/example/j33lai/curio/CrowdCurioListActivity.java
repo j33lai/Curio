@@ -2,11 +2,13 @@ package com.example.j33lai.curio;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -14,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
@@ -49,6 +52,7 @@ public class CrowdCurioListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
     private static boolean loadweb = false;
+    private static String currenturl = "http://crowdcurio.com/api/project/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,29 +63,74 @@ public class CrowdCurioListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
+        ProgressBar pbar1 = (ProgressBar) findViewById(R.id.app_progress);
+        pbar1.setVisibility(View.GONE);
+        SearchView sv = (SearchView) findViewById(R.id.app_search);
+
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                try {
+                    loadweb = false;
+                    currenturl = currenturl + "?description=" + query;
+                    ProgressBar pbar = (ProgressBar) findViewById(R.id.app_progress);
+                    pbar.setVisibility(View.VISIBLE);
+                    new getProjects().execute(new URL(currenturl));
+                    Log.d("Onsearch", query);
+                    return true;
+                } catch (MalformedURLException e) {
+                    Log.d("URL", "formatError");
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        sv.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                try {
+                    loadweb = false;
+                    ProgressBar pbar = (ProgressBar) findViewById(R.id.app_progress);
+                    pbar.setVisibility(View.VISIBLE);
+                    new getProjects().execute(new URL(currenturl));
+                    Log.d("Onsearch", "close");
+                    return true;
+                } catch (MalformedURLException e) {
+                    Log.d("URL", "formatError");
+                }
+                return false;
+            }
+        });
+
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                try {
+                    loadweb = false;
+                    ProgressBar pbar = (ProgressBar) findViewById(R.id.app_progress);
+                    pbar.setVisibility(View.VISIBLE);
+                    new getProjects().execute(new URL(currenturl));
+                    Log.d("refresh", "refresh");
+                } catch (MalformedURLException e) {
+                    Log.d("URL", "formatError");
+                }
+
             }
         });
 
-        //View recyclerView = findViewById(R.id.crowdcurio_list);
-        //assert recyclerView != null;
-        //setupRecyclerView((RecyclerView) recyclerView);
 
-        if (findViewById(R.id.crowdcurio_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
         if (!loadweb) {
             try {
-                new getProjects().execute(new URL("http://test.crowdcurio.com/api/project/"));
+                ProgressBar pbar = (ProgressBar) findViewById(R.id.app_progress);
+                pbar.setVisibility(View.VISIBLE);
+                new getProjects().execute(new URL(currenturl));
             } catch (MalformedURLException e) {
                 Log.d("URL", "formatError");
             }
@@ -89,6 +138,14 @@ public class CrowdCurioListActivity extends AppCompatActivity {
             View recyclerView = findViewById(R.id.crowdcurio_list);
             assert recyclerView != null;
             setupRecyclerView((RecyclerView) recyclerView, null);
+        }
+
+        if (findViewById(R.id.crowdcurio_detail_container) != null) {
+            // The detail container view will be present only in the
+            // large-screen layouts (res/values-w900dp).
+            // If this view is present, then the
+            // activity should be in two-pane mode.
+            mTwoPane = true;
         }
     }
 
@@ -206,16 +263,11 @@ public class CrowdCurioListActivity extends AppCompatActivity {
 
         protected void onPostExecute(JSONObject result) {
             String test = "";
-            /*
-            try {
-                test = result.getJSONArray("data").getJSONObject(2).getString("type");
-            } catch (JSONException e) {
-                Log.d("result", "error");
-            }*/
-
             View recyclerView = findViewById(R.id.crowdcurio_list);
             assert recyclerView != null;
             setupRecyclerView((RecyclerView) recyclerView, result);
+            ProgressBar pbar = (ProgressBar) findViewById(R.id.app_progress);
+            pbar.setVisibility(View.GONE);
             Log.d("result", test);
         }
     }
